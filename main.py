@@ -67,6 +67,15 @@ def getLetter():
         letter = "J"
     return letter
 
+def getJoueurWithD(letter):
+    base = getJoueurByLetter(letter)
+    voyelle = {"a","A","e","E","i","I","o","O","u","U","y","Y"}
+    char = base[0]
+    if(char in voyelle):
+        return "d'" + base
+    else:
+        return "de " + base
+
 def getJoueur():
     if(isFirstPlayer):
         return joueur1
@@ -146,7 +155,7 @@ def updateScreen():
     if(hasStartGame):
         draw_grid()
 
-        playerTo = txtFont.render(f"C'est au tour de {getJoueur()}.", 1, body.Gris)
+        playerTo = txtFont.render(f"C'est au tour {getJoueurWithD(getLetter())}.", 1, body.Gris)
         pionColorTo = txtFont.render(f"La couleur est {getNameByLetter(getLetter())}.", 1, body.Gris)
         fenetre.blit(playerTo, [350, 5])
         fenetre.blit(pionColorTo, [420, 30])
@@ -208,7 +217,7 @@ def victoire():
     fenetre.blit(logo, (0, 0))
     pygame.draw.line(fenetre, body.LightBlanc, (0, 101), (800, 101), 5)
 
-    vicJoueurText = vicFont.render(f"Victoire de {getJoueurByLetter(check_victoire())} !", 1, body.Orange)
+    vicJoueurText = vicFont.render(f"Victoire {getJoueurWithD(check_victoire())} !", 1, body.Orange)
     vicText = vicFont.render(f"Il était {getNameByLetter(check_victoire())}.", 1, body.Orange)
     fenetre.blit(vicJoueurText, [100, 500])
     fenetre.blit(vicText, [100, 535])
