@@ -1,13 +1,25 @@
 """
 Importation des ressources nécessaires
+
+PyGame: Bibliothèque graphique
+Body: Fichier contenant les couleurs
+pions: Fichier contenant la gestion des pions
+time: Bibliothèque de gestion du temps
+
 """
 import pygame
 import body
 import pions
-import time
+from time import sleep
 
 """
 Paramètres de l'interface graphique
+
+DIM_GRILLE: Dimension de la grille de jeu (modulable)
+TAILLE_CELLULE: Taille d'une cellule de la grille (carré du pion)
+TAILLE_FENETRE: Calcul automatique de la taille de la fenêtre en fonction de la taille de la grille et de la taille d'une cellule
+RADIUS: Rayon du pion
+
 """
 DIM_GRILLE = (7, 6)
 TAILLE_CELLULE = 100
@@ -16,6 +28,10 @@ RADIUS = TAILLE_CELLULE // 2 - 5
 
 """
 Initialisation de l'interface
+
+pygame.display.set_caption: Définir le titre de la fenêtre
+pygame.display.set_mode: Définir la taille de la fenêtre avec notre variable TAILLE_FENETRE 
+
 """
 pygame.init()
 pygame.display.set_caption("Puissance 4")
@@ -23,10 +39,26 @@ fenetre = pygame.display.set_mode(TAILLE_FENETRE)
 
 """
 Variables dynamiques du jeu
+
+grille: Définition de la matrice de jeu
+running: Variable de la boucle principale
+all_pions: Liste des pions de la partie
+isFirstPlayer: Si c'est le tour du premier joueur ou non
+hasStartGame: Si la partie a commencé ou non
+menuId: Identifiant du menu actuel
+
+joueur1: Pseudo du joueur 1
+joueur2: Pseudo du joueur 2
+
+pygame.font.init: Initialisation des polices d'écriture
+vicFont: Police d'écriture pour le message de victoire
+txtFont: Police d'écriture pour les textes
+
+pygame.display.update: Mise à jour de l'interface
+
 """
-grille = [[" " for _ in range(7)] for _ in range(6)]
+grille = [[" " for _ in range(DIM_GRILLE[0])] for _ in range(DIM_GRILLE[1])]
 running = True
-runningConsole = False
 all_pions = []
 isFirstPlayer = True
 hasStartGame = False
@@ -50,9 +82,16 @@ pygame.display.update()
 
 """
 Fonctions appelées tout au long de la partie 
+Nommées généralement getters et setters.
+
+changePlayer: Changer le joueur actuel
+getLetter: Récupérer la lettre du joueur actuel
+getJoueurWithD: Récupérer le joueur actuel avec un "d'" ou "de" en fonction de la première lettre de son pseudo
+getJoueurByLetter: Récupérer le pseudo du joueur en fonction de sa lettre
+getColor: Récupérer la couleur du joueur actuel
+getNameColorByLetter: Récupérer le nom de la couleur du joueur actuel
+
 """
-
-
 def changePlayer():
     global isFirstPlayer
 
@@ -69,18 +108,12 @@ def getLetter():
 
 def getJoueurWithD(letter):
     base = getJoueurByLetter(letter)
-    voyelle = {"a","A","e","E","i","I","o","O","u","U","y","Y"}
+    voyelles = ["a","A","e","E","i","I","o","O","u","U","y","Y"]
     char = base[0]
-    if(char in voyelle):
+    if(char in voyelles):
         return "d'" + base
     else:
         return "de " + base
-
-def getJoueur():
-    if(isFirstPlayer):
-        return joueur1
-    else:
-        return joueur2
 
 def getJoueurByLetter(letter):
     if(letter == "J"):
@@ -94,7 +127,7 @@ def getColor():
         color = "Jaune"
     return color
 
-def getNameByLetter(letter):
+def getNameColorByLetter(letter):
     if (letter == "J"):
         return "Jaune"
     elif (letter == "R"):
@@ -105,9 +138,15 @@ def getNameByLetter(letter):
 
 """
 Mises à jour visuel
+
+draw_grid: Dessiner la grille de jeu et les pions
+set_pions: Création d'un pion avec notre objet pion de pions.py et ajout dans la liste all_pions
+updateDemarrage: Mise à jour de l'écran de démarrage
+updateScreen: Mise à jour de l'écran de jeu
+updateConsole: Mise à jour de la console pour suivre le dérouler de la partie
+getGoodPionInGril: Récupérer la bonne case de la grille pour placer le pion
+
 """
-
-
 def draw_grid():
     for col in range(DIM_GRILLE[0]):
         for lig in range(DIM_GRILLE[1]):
@@ -115,12 +154,16 @@ def draw_grid():
 
     for pion in all_pions:
         pygame.draw.circle(fenetre, pion.realColor(), (pion.x + TAILLE_CELLULE // 2, (pion.y + 1) + TAILLE_CELLULE // 2), RADIUS)
-def draw_pions(x,y):
+
+
+def set_pions(x,y):
     pion = pions.pion(getColor(), x * TAILLE_CELLULE, y * TAILLE_CELLULE)
     all_pions.append(pion)
 
 logoStartButton = pygame.image.load("start-button.png")
+# logoStartButtonRct : Définition de la zone cliquable du bouton de démarrage
 logoStartButtonRct = logoStartButton.get_rect()
+
 def updateDemarrage():
     if(menuId == "GAMEMODE"):
         logoStartGraphic = pygame.image.load("start-graphic.png")
@@ -132,7 +175,7 @@ def updateDemarrage():
         writeYourName = txtFont.render(f"Écrivez vos pseudos ici", 1, body.Blanc)
         fenetre.blit(writeYourName, [50, 150])
 
-        wherePlaceCursor = txtFont.render(f"Votre curseur sera l'endroit ou écrire.", 1, body.Blanc)
+        wherePlaceCursor = txtFont.render(f"Mettez votre curseur à l'endroit où vous voulez écrire", 1, body.Blanc)
         fenetre.blit(wherePlaceCursor, [50, 170])
 
         pygame.draw.rect(fenetre, body.Gris, rectangleJoueur1)
@@ -150,13 +193,16 @@ def updateScreen():
 
     logo = pygame.image.load('p4-logo.png')
     fenetre.blit(logo, (0, 0))
+
+    # Ligne de séparation entre le logo et la grille
     pygame.draw.line(fenetre, body.LightBlanc, (0, 101), (800, 101), 5)
+
 
     if(hasStartGame):
         draw_grid()
 
         playerTo = txtFont.render(f"C'est au tour {getJoueurWithD(getLetter())}.", 1, body.Gris)
-        pionColorTo = txtFont.render(f"La couleur est {getNameByLetter(getLetter())}.", 1, body.Gris)
+        pionColorTo = txtFont.render(f"La couleur est {getNameColorByLetter(getLetter())}.", 1, body.Gris)
         fenetre.blit(playerTo, [350, 5])
         fenetre.blit(pionColorTo, [420, 30])
     else:
@@ -167,9 +213,8 @@ def updateScreen():
 """
 Mises à jour console
 """
-
-
 def updateConsole():
+    # Permet de mieux visualiser la console
     for n in range(0, 10):
         print("")
 
@@ -177,19 +222,23 @@ def updateConsole():
         print(lig)
 
 
-def updateGril(col):
+def getGoodPionInGril(col):
+    # Va de en bas en haut pour trouver la première case vide
     for lig in reversed(range(DIM_GRILLE[1])):
         if (grille[lig][col] == " "):
             grille[lig][col] = getLetter()
-            draw_pions(col, lig + 1)
-            break
+            set_pions(col, lig + 1)
+            break # Coupe la boucle
 
 
 """
 Système de victoire
+
+check_victoire: Vérifier si un joueur a gagné
+check_range: Vérifier si un joueur a gagné en fonction de la direction
+victoire: Afficher l'écran de victoire
+
 """
-
-
 def check_victoire():
     def check_range(lig, col, di, dj):
         pion = grille[lig][col]
@@ -218,20 +267,24 @@ def victoire():
     pygame.draw.line(fenetre, body.LightBlanc, (0, 101), (800, 101), 5)
 
     vicJoueurText = vicFont.render(f"Victoire {getJoueurWithD(check_victoire())} !", 1, body.Orange)
-    vicText = vicFont.render(f"Il était {getNameByLetter(check_victoire())}.", 1, body.Orange)
+    vicText = vicFont.render(f"Il était {getNameColorByLetter(check_victoire())}.", 1, body.Orange)
     fenetre.blit(vicJoueurText, [100, 500])
     fenetre.blit(vicText, [100, 535])
 
     pygame.display.flip()
-    time.sleep(5)
+    sleep(5)
     running = False
 
 
 """
 Fonction de démarrage du jeu
-"""
 
-if(__name__ == "__main__"):
+runGame: Boucle principale du jeu
+
+"""
+def runGame():
+    global running,hasStartGame,menuId,joueur1,joueur2
+
     while (running):
         for event in pygame.event.get():
             if (event.type == pygame.QUIT):
@@ -240,7 +293,7 @@ if(__name__ == "__main__"):
             if (event.type == pygame.MOUSEBUTTONDOWN):
                 if (hasStartGame):
                     if (pygame.mouse.get_pos()[1] >= 102):
-                        updateGril(pygame.mouse.get_pos()[0] // 100)
+                        getGoodPionInGril(pygame.mouse.get_pos()[0] // 100)
                         changePlayer()
                         if (check_victoire() != None):
                             victoire()
@@ -278,3 +331,6 @@ if(__name__ == "__main__"):
             if(pygame.display.get_init()):
                 updateScreen()
     pygame.quit()
+
+if(__name__ == "__main__"):
+    runGame()
